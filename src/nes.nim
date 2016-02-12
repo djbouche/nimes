@@ -1,12 +1,12 @@
 import nes.types, nes.cpu, nes.apu, nes.ppu, nes.cartridge, nes.controller,
   nes.mapper, nes.mem
 
-export types.NES, types.NESObj, types.Buttons, setButtons, resolution
+export types.NES, types.FileType, types.NESObj, types.Buttons, setButtons, resolution
 
-proc newNES*(path: string): NES =
+proc newNES*(path: string, fileType: FileType = ftINES, songNumber: int = 0): NES =
   new result
   try:
-    result.cartridge = newCartridge(path)
+    result.cartridge = newCartridge(path, fileType, songNumber)
   except ValueError:
     raise newException(ValueError,
       "failed to open " & path & ": " & getCurrentExceptionMsg())

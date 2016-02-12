@@ -9,6 +9,8 @@ type
     mapper*: Mapper
     ram*: array[2048'u16, uint8]
 
+  FileType* = enum ftINES, ftNSF
+
   CPU* = object
     mem*: CPUMemory
     cycles*: uint64

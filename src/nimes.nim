@@ -1,6 +1,6 @@
 import
   rewinder, nes,
-  os, times, algorithm,
+  os, times, algorithm, strutils,
   sdl2, sdl2.audio, sdl2.joystick
 
 const saveSize = 600
@@ -61,10 +61,13 @@ try:
     # TODO: Proper Android support, this just shows a video of a single game
     nesConsole = newNES("smb3.nes")
   else:
-    if paramCount() != 1:
-      quit "Usage: nimes <rom.nes>"
-    else:
-      nesConsole = newNES(paramStr(1))
+    if paramCount() != 1 and paramCount() != 2:
+      quit "Usage: nimes <rom.nes> [nsf song number]"
+    elif paramCount() == 1:
+      nesConsole = newNES(paramStr(1), ftINES)
+    elif paramCount() == 2:
+      let songNumber = paramStr(2).parseInt
+      nesConsole = newNES(paramStr(1), ftNSF, songNumber)
 except:
   quit getCurrentExceptionMsg()
 
