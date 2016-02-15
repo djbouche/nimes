@@ -1,4 +1,5 @@
 import types, controller, mapper, mapper2
+import strutils
 
 export types.CPUMemory, types.PPUMemory
 

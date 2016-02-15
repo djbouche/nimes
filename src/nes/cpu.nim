@@ -1,4 +1,4 @@
-import types, mem
+import types, mem, strutils
 
 export types.CPU, types.frequency
 

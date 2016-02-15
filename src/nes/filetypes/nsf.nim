@@ -1,9 +1,11 @@
 import "../types", strutils, sequtils
 
+import debuglog
+
 const NSFMagic = 0x4D53454E
 
 template writeByte(sequence: seq[uint8], counter: expr, value: uint8) =
-  echo counter.int.toHex(4) & ": " & value.int.toHex(2)
+  logMessage counter.int.toHex(4) & ": " & value.int.toHex(2)
   prg[counter-0x8000] = value
   counter.inc
 
@@ -39,8 +41,8 @@ template writeLdaImmStaAddr(sequence: seq[uint8], counter: int, immediate: uint8
 
 template createLabel(counter: int, name: untyped) {.immediate.} =
   let name: uint16 = counter.uint16
-  echo ""
-  echo name.astToStr & ":"
+  logMessage ""
+  logMessage name.astToStr & ":"
 
 type NSFHeader = object {.packed.}
   magic: uint32
@@ -84,13 +86,13 @@ proc readNSFFile*(cartridge: Cartridge, file: File, songNumber: int = 0) =
 
   # We are going to write a bootstrap program in assembly
 
-  echo "LOAD: " & header.loadAddr.int.toHex(4)
-  echo "INIT: " & header.initAddr.int.toHex(4)
-  echo "PLAY: " & header.playAddr.int.toHex(4)
+  logMessage "LOAD: " & header.loadAddr.int.toHex(4)
+  logMessage "INIT: " & header.initAddr.int.toHex(4)
+  logMessage "PLAY: " & header.playAddr.int.toHex(4)
 
   # initialize writing PC
   var pc = prgBootstrapStart
-  echo "the pc is " & pc.toHex(4)
+  logMessage "the pc is " & pc.toHex(4)
 
   # http://www.nullsleep.com/treasure/nsf_cart_guide/
 
