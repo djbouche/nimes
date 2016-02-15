@@ -1,3 +1,5 @@
+import tables, options
+
 type
   NES* = ref NESObj
   NESObj* = object
@@ -22,8 +24,11 @@ type
 
   Interrupt* = enum iNone, iNMI, iIRQ
 
+  MemOverrideRAMFreezeEntry* = tuple[cmp: proc(_:CPUMemory):bool, val: uint8]
+
   CPUMemory* = ref object
     nes*: NES
+    memOverrides*: TableRef[uint16, MemOverrideRAMFreezeEntry]
 
   PPU* = object
     mem*: PPUMemory

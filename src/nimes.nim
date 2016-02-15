@@ -1,7 +1,8 @@
 import
   rewinder, nes,
   os, times, algorithm, strutils,
-  sdl2, sdl2.audio, sdl2.joystick
+  sdl2, sdl2.audio, sdl2.joystick,
+  cheats
 
 const saveSize = 600
 
@@ -55,6 +56,7 @@ let pitch = cint(resolution.x * sizeof(Color))
 var
   controllers: array[2, JoystickPtr]
   nesConsole: NES
+  cheatState: Cheats
 
 try:
   when defined(android):
@@ -70,6 +72,8 @@ try:
       nesConsole = newNES(paramStr(1), ftNSF, songNumber)
 except:
   quit getCurrentExceptionMsg()
+
+cheatState = newCheats(nesConsole)
 
 when defined(emscripten):
   const
@@ -216,7 +220,9 @@ proc loop {.cdecl.} =
       of SDL_SCANCODE_F10: speed = max(speed - 0.05, 0.05)
       of SDL_SCANCODE_F11: speed = min(speed + 0.05, 2.5)
       of SDL_SCANCODE_Y:   buttons[0][0] = true # Workaround for emscripten
-      else:                setButton e, true
+      else:
+        if not cheatState.handleKeyCode(e.keysym.scancode, cKeyDown):
+          setButton e, true
     of KeyUp:
       let e = evt.key()
 
@@ -228,7 +234,9 @@ proc loop {.cdecl.} =
           reverseReset = false
           paused = false
       of SDL_SCANCODE_Y:   buttons[0][0] = false
-      else:                setButton e, false
+      else:
+        if not cheatState.handleKeyCode(e.keysym.scancode, cKeyUp):
+          setButton e, false
     of JoyDeviceAdded:
       let e = evt.jdevice()
       if e.which < 2:

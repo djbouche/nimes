@@ -1,10 +1,10 @@
 import types, controller, mapper, mapper2
-import strutils
+import strutils, tables, options
 
-export types.CPUMemory, types.PPUMemory
+export types.CPUMemory, types.PPUMemory, types.MemOverrideRAMFreezeEntry
 
 proc newCPUMemory*(nes: NES): CPUMemory =
-  CPUMemory(nes: nes)
+  CPUMemory(nes: nes, memOverrides: newTable[uint16, MemOverrideRAMFreezeEntry]())
 
 proc newPPUMemory*(nes: NES): PPUMemory =
   PPUMemory(nes: nes)
@@ -318,7 +318,7 @@ proc `[]=`*(mem: CPUMemory, adr: uint16, val: uint8) =
 
 proc `[]`*(mem: CPUMemory, adr: uint16): uint8 =
   let n = mem.nes
-  case adr
+  var ret = case adr
   of 0x0000..0x1FFF: n.ram[adr mod 0x0800]
   of 0x2000..0x3FFF: n.ppu[0x2000'u16 + (adr mod 8)]
   of 0x4014: n.ppu[adr]
@@ -327,6 +327,14 @@ proc `[]`*(mem: CPUMemory, adr: uint16): uint8 =
   of 0x4017: n.controllers[1].read()
   of 0x6000..0xFFFF: n.mapper[adr]
   else: 0 # TODO: IO registers
+
+  let o = mem.memOverrides
+  if o.contains(adr):
+    let f = o[adr]
+    if f.cmp(mem):
+      return f.val
+
+  return ret
 
 proc read16*(mem: CPUMemory, adr: uint16): uint16 =
   mem[adr+1].uint16 shl 8 or mem[adr]
